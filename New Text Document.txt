@@ -1,0 +1,166 @@
+CREATE TABLE member (
+  member_no INT PRIMARY KEY, 
+  name VARCHAR(20)
+);
+
+CREATE TABLE book (
+  isbn INT PRIMARY KEY, 
+  title VARCHAR(20),
+  author VARCHAR(20), 
+  publisher VARCHAR(20) 
+);
+
+CREATE TABLE borrowed (
+  member_no INT, 
+  isbn INT, 
+  borrowDate DATE,
+  PRIMARY KEY (member_no, isbn),  
+  FOREIGN KEY (isbn) REFERENCES book (isbn), 
+  FOREIGN KEY (member_no) REFERENCES member (member_no)
+);
+
+
+
+
+
+
+
+
+
+
+
+INSERT INTO member (member_no, name) VALUES 
+(1, 'Alice Johnson'),
+(2, 'Bob Smith'),
+(3, 'Charlie Davis'),
+(4, 'Diana Roberts'),
+(5, 'Edward Wilson');
+
+
+INSERT INTO book (isbn, title, author, publisher) VALUES 
+(1001, 'Book A', 'Author A', 'Publisher A'),
+
+(1002, 'Book B', 'Author B', 'Publisher A'),
+
+(1003, 'Book C', 'Author C', 'Publisher C'),
+
+(1004, 'Book D', 'Author D', 'Publisher C'),
+(1005, 'Book E', 'Author E', 'Publisher C'),
+(1006, 'Book F', 'Author F', 'Publisher D'),
+(1007, 'Book G', 'Author F', 'Publisher G'),
+(1008, 'Book H', 'Author F', 'Publisher H');
+
+
+
+INSERT INTO borrowed (member_no, isbn, borrowDate) VALUES 
+(1, 1001, '2025-03-01'),
+(1, 1002, '2025-03-22'),
+
+(2, 1002, '2025-03-05'),
+(2, 1003, '2025-03-25'),
+
+(3, 1003, '2025-03-10'),
+
+(4, 1004, '2025-03-15'),
+(4, 1005, '2025-03-15'),
+(4, 1006, '2025-03-20'),
+(4, 1007, '2025-03-22'),
+(4, 1008, '2025-03-22');
+
+
+
+
+
+-- query 1 : 
+select  x.member_no , x.name
+from member As x join borrowed As y 
+on x.member_no = y.member_no
+join book As z 
+on y.isbn = z.isbn
+where publisher = "Publisher C" ; 
+
+
+
+
+-- query 2 :
+SELECT x.name, x.member_no , z.isbn ,publisher 
+FROM member x
+JOIN borrowed y 
+ON x.member_no = y.member_no
+join book z on y.isbn = z.isbn
+where publisher = "Publisher C"
+group by name 
+having count (name) = (select count(publisher) from book where publisher = "Publisher C")
+
+
+-- query 3 : 
+
+SELECT x.member_no, name, publisher, COUNT(*) AS borrow_count
+FROM borrowed y
+JOIN member x 
+ON x.member_no = y.member_no
+JOIN book z 
+ON z.isbn = y.isbn
+GROUP BY x.member_no, x.name, z.publisher
+HAVING COUNT(*) >= 5;
+
+
+
+
+
+-- query 4 :
+
+select  name , count(name) / (select count(*) from borrowed )
+from member As x join borrowed As y 
+on x.member_no = y.member_no
+group by name ;
+
+
+
+
+
+
+
+
+
+
+
+
+-- Q2 )
+
+CREATE TABLE Demand (
+    day int ,
+    product  char(1),
+  	qty INT 
+);
+
+
+
+
+INSERT INTO Demand (day, product, qty) VALUES
+(1, 'A', 10),
+(2, 'A', 6),
+(3, 'A', 21),
+(4, 'A', 9),
+(5, 'A', 12),
+(1, 'B', 18),
+(2, 'B', 3),
+(3, 'B', 6),
+(4, 'B', 23);
+
+
+
+
+-- A) 
+Select  day , qty , SUM(qty) OVER (ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as cumQty  from demand ;
+
+-- B)
+SELECT product, day, qty, RN
+FROM (
+    SELECT product, day, qty,
+           RANK() OVER (PARTITION BY product ORDER BY qty) AS RN
+    FROM demand
+) 
+WHERE RN <= 2;
+
+
