@@ -116,6 +116,10 @@ on x.member_no = y.member_no
 group by name ;
 
 
+-- query 4.1 (Extra)
+
+select   count(name) / (select count(*) from borrowed ) as AVG_Borrow_perMember
+from member , borrowed
 
 
 
