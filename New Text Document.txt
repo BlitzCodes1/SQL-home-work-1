@@ -90,7 +90,7 @@ ON x.member_no = y.member_no
 join book z on y.isbn = z.isbn
 where publisher = "Publisher C"
 group by name 
-having count (name) = (select count(publisher) from book where publisher = "Publisher C")
+having count (name) = (select count(publisher) from book where publisher = "Publisher C");
 
 
 -- query 3 : 
